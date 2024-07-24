@@ -233,8 +233,12 @@ pub fn supported_backends() -> wgpu::Backends {
         //   with old hardware or bad/missing drivers. Wgpu automatically prefers Vulkan over GL when possible.
         //
         // For changing the backend we use standard wgpu env var, i.e. WGPU_BACKEND.
-        wgpu::util::backend_bits_from_env()
-            .unwrap_or(wgpu::Backends::VULKAN | wgpu::Backends::METAL | wgpu::Backends::GL)
+
+        if let Some(backends) = wgpu::util::backend_bits_from_env() {
+            backends
+        } else {
+            wgpu::Backends::VULKAN | wgpu::Backends::METAL | wgpu::Backends::GL
+        }
     } else {
         wgpu::Backends::GL | wgpu::Backends::BROWSER_WEBGPU
     }

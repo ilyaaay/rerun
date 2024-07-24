@@ -40,7 +40,7 @@ pub mod mesh_vertices {
             .iter()
             .flat_map(|layout| layout.attributes.iter())
             .max_by(|a1, a2| a1.shader_location.cmp(&a2.shader_location))
-            .unwrap()
+            .expect("Failed to get max value beetween free shaders location")
             .shader_location
             + 1
     }

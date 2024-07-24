@@ -116,7 +116,7 @@ impl FileSystem for &'static MemFileSystem {
     fn read_to_string(&self, path: impl AsRef<Path>) -> anyhow::Result<Cow<'static, str>> {
         let path = path.as_ref().clean();
         let files = self.files.read();
-        let files = files.as_ref().unwrap();
+        let files = files.as_ref().expect("failed convertation ref");
         files
             .get(&path)
             // NOTE: This is calling `Cow::clone`, which doesn't actually clone anything
@@ -128,15 +128,17 @@ impl FileSystem for &'static MemFileSystem {
     fn canonicalize(&self, path: impl AsRef<Path>) -> anyhow::Result<PathBuf> {
         let path = path.as_ref().clean();
         let files = self.files.read();
-        let files = files.as_ref().unwrap();
-        ensure!(files.contains_key(&path), "file does not exist at {path:?}",);
+        if let Some(x) = files.as_ref() {
+            ensure!(x.contains_key(&path), "file does not exist at {path:?}",);
+        };
         Ok(path)
     }
 
     fn exists(&self, path: impl AsRef<Path>) -> bool {
         let files = self.files.read();
-        let files = files.as_ref().unwrap();
-        files.contains_key(&path.as_ref().clean())
+        files
+            .as_ref()
+            .is_some_and(|x| x.contains_key(&path.as_ref().clean()))
     }
 
     fn create_dir_all(&self, _: impl AsRef<Path>) -> anyhow::Result<()> {
@@ -149,8 +151,9 @@ impl FileSystem for &'static MemFileSystem {
         contents: Cow<'static, str>,
     ) -> anyhow::Result<()> {
         let mut files = self.files.write();
-        let files = files.as_mut().unwrap();
-        files.insert(path.as_ref().to_owned(), contents);
+        if let Some(x) = files.as_mut() {
+            x.insert(path.as_ref().to_owned(), contents);
+        };
         Ok(())
     }
 }

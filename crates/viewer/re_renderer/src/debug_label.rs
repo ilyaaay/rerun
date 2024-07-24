@@ -84,7 +84,13 @@ impl From<Option<&str>> for DebugLabel {
 
         Self {
             #[cfg(debug_assertions)]
-            label: str.unwrap_or("").to_owned(),
+            label: {
+                if let Some(x) = str {
+                    x.to_owned()
+                } else {
+                    String::new()
+                }
+            },
         }
     }
 }

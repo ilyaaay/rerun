@@ -101,8 +101,10 @@ pub struct LineBatchBuilder<'a, 'ctx>(&'a mut LineDrawableBuilder<'ctx>);
 impl<'a, 'ctx> Drop for LineBatchBuilder<'a, 'ctx> {
     fn drop(&mut self) {
         // Remove batch again if it wasn't actually used.
-        if self.0.batches.last().unwrap().line_vertex_count == 0 {
-            self.0.batches.pop();
+        if let Some(last) = self.0.batches.last() {
+            if last.line_vertex_count == 0 {
+                self.0.batches.pop();
+            }
         }
     }
 }

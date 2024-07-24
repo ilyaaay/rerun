@@ -579,7 +579,11 @@ impl<Fs: FileSystem> FileResolver<Fs> {
             interp_files.insert(path.clone(), Rc::clone(&interp));
 
             // Cycle detection
-            path_stack.pop().unwrap();
+            path_stack
+                .pop()
+                .path_stack
+                .pop()
+                .expect("Failed to remove from path stack!");
             visited_stack.remove(&path);
 
             Ok(interp)

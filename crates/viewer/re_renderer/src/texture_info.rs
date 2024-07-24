@@ -27,10 +27,12 @@ impl Texture2DBufferInfo {
         let block_dimensions = format.block_dimensions();
         let width_blocks = extent.width / block_dimensions.0;
         let height_blocks = extent.height / block_dimensions.1;
+        let block_size = if let Some(x) = format.block_copy_size(Some(wgpu::TextureAspect::All)) {
+            x
+        } else {
+            0 // This happens if we can't have a single buffer.
+        };
 
-        let block_size = format
-            .block_copy_size(Some(wgpu::TextureAspect::All))
-            .unwrap_or(0); // This happens if we can't have a single buffer.
         let bytes_per_row_unpadded = width_blocks * block_size;
         let bytes_per_row_padded =
             wgpu::util::align_to(bytes_per_row_unpadded, wgpu::COPY_BYTES_PER_ROW_ALIGNMENT);
